@@ -1,26 +1,27 @@
-# Stage 1: Build stage
-FROM node:18-alpine AS build
+# Step 1: Build Stage
+FROM node:20-alpine AS build
 
 WORKDIR /app
 
-# 1. Receive ARG from docker build command
-ARG VITE_BASE_URL
-
-# 2. Set as ENV so npm run build can read it
-ENV VITE_BASE_URL=$VITE_BASE_URL
-
+# Packages install karne ke liye files copy karein
 COPY package*.json ./
+
+# Dependencies install karein
 RUN npm install
 
+# Source code copy karein
 COPY . .
 
-# 3. Build step MUST happen AFTER ARG and ENV declaration
+# React/Vite app build karein (package.json ka "build" script run hoga)
 RUN npm run build
 
-# Stage 2: Serve stage
+
+# Step 2: Production Stage (Nginx Server)
 FROM nginx:alpine
+
+# Build folder ko Nginx me copy karein
 COPY --from=build /app/dist /usr/share/nginx/html
-COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
+
 CMD ["nginx", "-g", "daemon off;"]
