@@ -1,11 +1,20 @@
+# Node.js base image
 FROM node:18-alpine
 
+# Working directory
 WORKDIR /app
 
+# Package manager files copy karein
 COPY package*.json ./
+
+# Dependencies install karein
 RUN npm install --production
 
+# Application code copy karein
 COPY . .
 
-EXPOSE 4000
-CMD ["node", "server.js"]  # or "npm", "start" depending on your package.json
+# Backend port expose karein
+EXPOSE 5000
+
+# Start command
+CMD ["node", "app.js"]
