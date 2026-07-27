@@ -33,7 +33,7 @@ pipeline {
         stage('Deploy to K8s') {
             steps {
                 script {
-                    sh "kubectl apply -f k8s/pvc.yml"
+                    sh "kubectl apply -f k8s/mongodb/pvc.yml"
                     sh "kubectl apply -f k8s/"
                 }
             }
