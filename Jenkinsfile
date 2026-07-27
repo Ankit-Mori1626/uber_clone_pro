@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         DOCKERHUB_USER = 'ankitmori1626'
-        DOCKER_CREDS = credentials('dckr_pat_HRW7x16stl9wsQZ26aW_nHQIWPk')
+        DOCKER_CREDS = credentials('dckr_pat_vb1sk6ILP6H-FEiOYTH2z83caqs')
     }
     stages {
         stage('Checoout Code') {
