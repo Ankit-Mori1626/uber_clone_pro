@@ -34,7 +34,9 @@ pipeline {
             steps {
                 script {
                     sh "kubectl apply -f k8s/mongodb/pvc.yml"
-                    sh "kubectl apply -f k8s/"
+                    sh "kubectl apply -f k8s/frontend/*.yml"
+                    sh "kubectl apply -f k8s/backend/*.yml"
+                    sh "kubectl apply -f k8s/mongodb/mongo-deployment.yml"
                 }
             }
         }
