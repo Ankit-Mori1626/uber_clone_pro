@@ -3,23 +3,24 @@ pipeline {
 
     environment {
         DOCKERHUB_USER = 'ankitmori1626'
-        DOCKER_CREDS = credentials('dckr_pat_vb1sk6ILP6H-FEiOYTH2z83caqs')
+        // Use the ID you defined in Jenkins Credentials, NOT the raw secret string
+        DOCKER_CREDS   = credentials('docker-cred') 
     }
+
     stages {
-        stage('Checoout Code') {
-            steps {
-                git branch: 'main', url: 'https://github.com/Ankit-Mori1626/uber_clone_pro.git'
-            }
-        }
         stage('Build & Push Backend Image') {
             steps {
                 script {
-                    sh "docker build -t ${DOCKERHUB_USER}/uber-backend-latest ./backend"
+                    // Fixed image tag name to match the push command
+                    sh "docker build -t ${DOCKERHUB_USER}/uber-backend:latest ./backend"
+                    
+                    // Log into Docker Hub securely using environment variables populated by Jenkins
                     sh "echo \$DOCKER_CREDS_PSW | docker login -u \$DOCKER_CREDS_USR --password-stdin"
                     sh "docker push ${DOCKERHUB_USER}/uber-backend:latest"
                 }
             }
         }
+
         stage('Build & Push Frontend Image') {
             steps {
                 script {
@@ -28,6 +29,7 @@ pipeline {
                 }
             }
         }
+
         stage('Deploy to K8s') {
             steps {
                 script {
@@ -38,5 +40,3 @@ pipeline {
         }
     }
 }
-    
-    
