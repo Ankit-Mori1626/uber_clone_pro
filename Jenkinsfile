@@ -12,7 +12,7 @@ pipeline {
             steps {
                 script {
                     // Fixed image tag name to match the push command
-                    sh "docker build -t ${DOCKERHUB_USER}/uber-backend:latest ./backend"
+                    sh "docker build -t ${DOCKERHUB_USER}/uber-backend:latest ./Backend"
                     
                     // Log into Docker Hub securely using environment variables populated by Jenkins
                     sh "echo \$DOCKER_CREDS_PSW | docker login -u \$DOCKER_CREDS_USR --password-stdin"
@@ -24,7 +24,7 @@ pipeline {
         stage('Build & Push Frontend Image') {
             steps {
                 script {
-                    sh "docker build -t ${DOCKERHUB_USER}/uber-frontend:latest ./frontend"
+                    sh "docker build -t ${DOCKERHUB_USER}/uber-frontend:latest ./Frontend"
                     sh "docker push ${DOCKERHUB_USER}/uber-frontend:latest"
                 }
             }
