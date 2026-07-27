@@ -24,7 +24,7 @@ pipeline {
         stage('Build & Push Frontend Image') {
             steps {
                 script {
-                    sh "docker build -t ${DOCKERHUB_USER}/uber-frontend:latest ./Frontend"
+                    sh "docker build -t ${DOCKERHUB_USER}/uber-frontend:latest ./frontend"
                     sh "docker push ${DOCKERHUB_USER}/uber-frontend:latest"
                 }
             }
