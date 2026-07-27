@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: mongodb
-        image: mongodb:latest
+        image: mongo:latest
         ports:
         - containerPort: 27017
         env:
@@ -22,6 +22,12 @@ spec:
           value: "admin"
         - name: MONGO_INITDB_ROOT_PASSWORD
           value: "password123"
+          volumeMounts:
+        - name: mongodb-data
+          mountPath: /data/db
+      volumes:
+      - name: mongodb-data
+        emptyDir: {}
 ---
 kind: Service
 apiVersion: v1
