@@ -1,47 +1,37 @@
-apiVersion: apps/v1
 kind: Deployment
+apiVersion: apps/v1
 metadata:
   name: mongodb
-  namespace: uber
-
 spec:
   replicas: 1
-
   selector:
-    matchLabels:
+    mathcLabels:
       app: mongodb
-
   template:
     metadata:
       labels:
         app: mongodb
-
     spec:
       containers:
       - name: mongodb
-        image: mongo:7
-
+        image: mongodb:latest
         ports:
         - containerPort: 27017
-
         env:
         - name: MONGO_INITDB_ROOT_USERNAME
-          valueFrom:
-            secretKeyRef:
-              name: mongodb-secret
-              key: MONGO_INITDB_ROOT_USERNAME
-
+          value: "admin"
         - name: MONGO_INITDB_ROOT_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: mongodb-secret
-              key: MONGO_INITDB_ROOT_PASSWORD
-
-        volumeMounts:
-        - name: mongodb-storage
-          mountPath: /data/db
-
-      volumes:
-      - name: mongodb-storage
-        persistentVolumeClaim:
-          claimName: mongodb-pvc
+          value: "password123"
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: mongodb-service
+spec:
+  ports:
+  - port: 27017
+    targetPort: 27017
+  selector:
+    app: mongodb
+  
+      
