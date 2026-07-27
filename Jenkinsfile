@@ -2,111 +2,46 @@ pipeline {
     agent any
 
     environment {
-        // --- CONFIGURATION ---
-        DOCKER_HUB_CRED_ID = 'docker-cred'   // ID of Docker Hub credentials stored in Jenkins
-        DOCKER_USER        = 'thesanketpawar'         // Your Docker Hub username
-        
-        // NodePort backend address accessible by public browsers
-        BACKEND_PUBLIC_URL = 'http://13.235.94.86:30090' 
-        
-        // K8s Namespace
-        K8S_NAMESPACE      = 'uber'
-
-        // Image Tags
-        FRONTEND_IMAGE     = "${DOCKER_USER}/uber-frontend:latest"
-        BACKEND_IMAGE      = "${DOCKER_USER}/uber-backend:latest"
+        DOCKERHUB_USER = 'ankitmori1626'
+        DOCKER_CREDS = credentials('dckr_pat_MMzHfWQv516tYkQTqVMl8i2LVFk')
     }
-
-    options {
-        buildDiscarder(logRotator(numToKeepStr: '10'))
-        disableConcurrentBuilds()
-        timestamps()
-    }
-
     stages {
-        stage('Checkout Source Code') {
+        stage('Checoout Code') {
             steps {
-                echo "Fetching latest source code..."
-                checkout scm
+                git branch: 'main', url: 'https://github.com/Ankit-Mori1626/uber_clone_pro.git'
             }
         }
-
-        stage('Build Docker Images') {
-            parallel {
-                stage('Build Backend') {
-                    steps {
-                        script {
-                            echo "Building Backend Docker Image..."
-                            // Matches the exact capital 'Backend' directory
-                            dir('Backend') {
-                                sh "docker build -t ${BACKEND_IMAGE} ."
-                            }
-                        }
-                    }
-                }
-
-                stage('Build Frontend') {
-                    steps {
-                        script {
-                            echo "Building Frontend Docker Image with VITE_BASE_URL=${BACKEND_PUBLIC_URL}..."
-                            dir('frontend') {
-                                // Now builds directly from frontend/ root
-                                sh "docker build --build-arg VITE_BASE_URL=${BACKEND_PUBLIC_URL} -t ${FRONTEND_IMAGE} ."
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        stage('Push Images to Docker Hub') {
+        stage('Build & Push Backend Image') {
             steps {
                 script {
-                    echo "Logging into Docker Hub and pushing images..."
-                    withCredentials([usernamePassword(credentialsId: DOCKER_HUB_CRED_ID, usernameVariable: 'DOCKER_USER_VAR', passwordVariable: 'DOCKER_PASS_VAR')]) {
-                        sh "echo \$DOCKER_PASS_VAR | docker login -u \$DOCKER_USER_VAR --password-stdin"
-                        sh "docker push ${BACKEND_IMAGE}"
-                        sh "docker push ${FRONTEND_IMAGE}"
-                    }
+                    sh "docker build -t ${DOCKERHUB_USER}/uber-backend-latest ./backend"
+                    sh "echo \$DOCKER_CREDS_PSW | docker login -u \$DOCKER_CREDS_USR --password-stdin"
+                    sh "docker push ${DOCKERHUB_USER}/uber-backend:latest"
                 }
             }
         }
-
-        stage('Deploy & Rollout to Kubernetes') {
+        stage('Build & Push Frontend Image') {
             steps {
                 script {
-                    echo "Applying Kubernetes manifests and restarting deployments in namespace: ${K8S_NAMESPACE}..."
-                    
-                    // Apply all manifests in k8s recursively
-                    sh "kubectl apply -f k8s/ -R -n uber"
-
-                    // Trigger zero-downtime rolling updates
-                    sh "kubectl rollout restart deployment/backend -n ${K8S_NAMESPACE}"
-                    sh "kubectl rollout restart deployment/frontend -n ${K8S_NAMESPACE}"
-
-                    // Verify rollout status
-                    sh "kubectl rollout status deployment/backend -n ${K8S_NAMESPACE} --timeout=120s"
-                    sh "kubectl rollout status deployment/frontend -n ${K8S_NAMESPACE} --timeout=120s"
+                    sh "docker build -t ${DOCKERHUB_USER}/uber-frontend:latest ./frontend"
+                    sh "docker push ${DOCKERHUB_USER}/uber-frontend:latest"
+                }
+            }
+        }
+        stage('Deploy to K8s') {
+            steps {
+                script {
+                    sh "kubectl apply -f k8s/pvc.yml"
+                    sh "kubectl apply -f k8s/"
                 }
             }
         }
     }
-
     post {
-        success {
-            echo "Successfully built and deployed Uber Clone to Kubernetes!"
-            echo "Frontend accessible at: http://13.235.94.86:30080"
-            echo "Backend accessible at:  http://13.235.94.86:30090"
-        }
-        failure {
-            echo "Pipeline failed! Checking Kubernetes pod status..."
-            sh "kubectl get pods -n ${K8S_NAMESPACE}"
-            sh "kubectl logs deployment/frontend -n ${K8S_NAMESPACE} --tail=50 || true"
-            sh "kubectl logs deployment/backend -n ${K8S_NAMESPACE} --tail=50 || true"
-        }
         always {
-            echo "Cleaning up local Docker dangling images..."
-            sh "docker image prune -f || true"
+            sh "docker logouot"
         }
     }
 }
+    
+    
