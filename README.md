@@ -17,4 +17,10 @@ Expose Port 5000 in the Security Group to allows Backend Service access when you
 2. **Load Necessary Kernel Modules:** Required for Kubernetes networking.
 
    ```bash
-   cat <<EOF /etc/modules-load.d/k8s.conf EOF ``` br_netfilter modprobe overlay sudo tee |>
+   cat <<EOF | sudo tee /etc/modules-load.d/k8s.conf
+overlay
+br_netfilter
+EOF
+
+sudo modprobe overlay
+sudo modprobe br_netfilter
