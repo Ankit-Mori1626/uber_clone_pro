@@ -24,6 +24,11 @@ io.on('connection', (socket) => {
     });
 });
 
+// 👇 YE RAHAA ROOT ROUTE (Yahan add karna hai)
+app.get('/', (req, res) => {
+    res.send('Uber Backend API is running!');
+});
+
 // 👇 YE NAYA CODE ADD KARO
 const PORT = process.env.PORT || 5000;
 
